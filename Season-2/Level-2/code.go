@@ -15,6 +15,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 )
 
@@ -58,19 +59,22 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		password := reqBody.Password
 
 		if !isValidEmail(email) {
-			log.Printf("Invalid email format: %q", email)
+			// Fix: Removing the email from the log
+			log.Printf("Invalid email format")
 			http.Error(w, "Invalid email format", http.StatusBadRequest)
 			return
 		}
 
 		storedPassword, ok := testFakeMockUsers[email]
 		if !ok {
-			http.Error(w, "invalid email or password", http.StatusUnauthorized)
+			// Fix: Correcting the message to prevent user enumeration
+			http.Error(w, "Invalid Email or Password", http.StatusUnauthorized)
 			return
 		}
 
 		if password == storedPassword {
-			log.Printf("User %q logged in successfully with a valid password %q", email, password)
+			// Fix: Removing the email and password from the log
+			log.Printf("Successful login request")
 			w.WriteHeader(http.StatusOK)
 		} else {
 			http.Error(w, "Invalid Email or Password", http.StatusUnauthorized)
@@ -83,8 +87,12 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/login", loginHandler)
-	log.Print("Server started. Listening on :8080")
-	err := http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8089"
+	}
+	log.Printf("Server started. Listening on :%s", port)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatalf("HTTP server ListenAndServe: %q", err)
 	}
