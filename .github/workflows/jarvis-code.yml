@@ -1,3 +1,4 @@
+# Securely check GitHub status without third-party action
 name: CODE - Jarvis Gone Wrong
 
 on:
